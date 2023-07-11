@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model otp {
+  id         BigInt    @id @default(autoincrement())
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  otp_code   String?
+  email      String    @unique
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user {
+  id                   String                @id(map: "Customer_pkey") @unique(map: "customer_id_key") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime?             @default(now()) @db.Timestamptz(6)
+  full_name            String?
+  type                 String?
+  blog                 blog[]
+  user_account_details user_account_details?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_account_details {
+  id         String    @id(map: "customer_account_details_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  mobile     String?   @unique(map: "customer_account_details_mobile_key")
+  email      String?   @unique(map: "customer_account_details_email_key")
+  address    String?
+  dob        DateTime? @db.Date
+  user_id    String    @unique(map: "customer_account_details_customer_id_key") @db.Uuid
+  user       user      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blog {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  title            String?
+  description      String?
+  meta_description String?
+  user_id          String?   @db.Uuid
+  image_url        String?
+  user             user?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum user_role_enum {
+  user
+  premium
+  admin
+}
