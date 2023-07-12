@@ -69,11 +69,31 @@ export class BlogService {
         }
     }
 
-    async deleteBlog(id:string):Promise<any>{
+    async deleteBlog(id: string): Promise<any> {
         try {
             return await this.prisma.blog.delete({
-                where:{
-                    id:id
+                where: {
+                    id: id
+                }
+            })
+        } catch (error) {
+            console.log(error);
+            throw new HttpException(
+                'Server Problem,Try Again',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+    }
+
+    async updateBlog(id: string, BlogDetails: BlogDto): Promise<BlogDto> {
+        const updateBlog = plainToClass(BlogDto, BlogDetails)
+        try {
+            return await this.prisma.blog.update({
+                where: {
+                    id: id
+                },
+                data: {
+                    ...updateBlog
                 }
             })
         } catch (error) {
